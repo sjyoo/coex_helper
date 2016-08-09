@@ -14,12 +14,16 @@ TPAGE_ARGS = --define kb_top=$(TARGET) --define kb_runtime=$(DEPLOY_RUNTIME) --d
         --define kb_service_port=$(SERVICE_PORT)
 
 DIR = $(shell pwd)
+CONTAINER_DIR = $(shell readlink -f ../.. )
+CONTAINER_DIR_NAME = $(shell basename $(CONTAINER_DIR))
+
 LIB_DIR = lib
 LBIN_DIR = bin
 EXECUTABLE_SCRIPT_NAME = run_$(SERVICE_NAME).sh
+TEST_DIR = ltest
 
 
-default: build-libs build-executable-script-python
+default: compile build-executable-script-python
 
 include $(TOP_DIR)/tools/Makefile.common
 include $(TOP_DIR)/tools/Makefile.common.rules
@@ -36,7 +40,7 @@ build-executable-script-python: setup-local-dev-kb-py-libs
 	echo 'python $(DIR)/lib/biokbase/$(SERVICE_NAME)/$(SERVICE_NAME).py $$1 $$2 $$3' \
 		>> $(LBIN_DIR)/$(EXECUTABLE_SCRIPT_NAME)
 	chmod +x $(LBIN_DIR)/$(EXECUTABLE_SCRIPT_NAME)
-ifeq ($(TOP_DIR_NAME), dev_container)
+ifeq ($(CONTAINER_DIR_NAME), dev_container)
 	cp $(LBIN_DIR)/$(EXECUTABLE_SCRIPT_NAME) $(TOP_DIR)/bin/.
 else
 	cp $(LBIN_DIR)/$(EXECUTABLE_SCRIPT_NAME) $(KB_TOP)/bin/.
@@ -45,7 +49,7 @@ endif
 setup-local-dev-kb-py-libs:
 	touch lib/biokbase/__init__.py
 	touch lib/biokbase/$(SERVICE_NAME)/__init__.py
-ifeq ($(TOP_DIR_NAME), dev_container)
+ifeq ($(CONTAINER_DIR_NAME), dev_container)
 	-rsync -vrh $(TOP_DIR)/modules/kbapi_common/lib/biokbase/* lib/biokbase/.
 	-rsync -vrh $(TOP_DIR)/modules/auth/lib/biokbase/* lib/biokbase/.
 	-rsync -vrh $(TOP_DIR)/modules/handle_service/lib/biokbase/* lib/biokbase/.
@@ -63,9 +67,7 @@ endif
 
 update-R:
 	export TARGET=$(TARGET) || export R_LIBS=$(TARGET)/lib || (bash $(DIR)/deps/WGCNA/install-r-packages.sh)
-	#export TARGET=$(TARGET) || export R_LIBS=$(TARGET)/lib || R --vanilla --slave -e "library('WGCNA')" || (bash $(DIR)/deps/WGCNA/install-r-packages.sh)
-
-
+	
 dk-build:
 	docker build -t kbase/coex:test .
 
@@ -99,34 +101,34 @@ test: test-impl create-test-wrapper
 
 
 test-impl: create-test-wrapper
-	./ltest/script_test/run_tests.sh
+	./$(TEST_DIR)/script_test/run_tests.sh
 
 create-test-wrapper:
 	@echo "Creating test script wrapper"
-ifeq ($(TOP_DIR_NAME), dev_container)
-	echo '#!/bin/bash' > ltest/script_test/run_tests.sh
-	echo 'export PATH=$(PATH):$(TARGET)/bin' >> ltest/script_test/run_tests.sh
-	echo 'export KB_RUNTIME=$(DEPLOY_RUNTIME)' >> ltest/script_test/run_tests.sh
-	echo 'export PYTHONPATH="$(DIR)/$(LIB_DIR)"' >> ltest/script_test/run_tests.sh
-	echo 'python $(DIR)/ltest/script_test/basic_test.py $$1 $$2 $$3' \
-		>> ltest/script_test/run_tests.sh
-	chmod +x ltest/script_test/run_tests.sh
+ifeq ($(CONTAINER_DIR_NAME), dev_container)
+	echo '#!/bin/bash' > $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export PATH=$(PATH):$(TARGET)/bin' >> $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export KB_RUNTIME=$(DEPLOY_RUNTIME)' >> $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export PYTHONPATH="$(DIR)/$(LIB_DIR)"' >> $(TEST_DIR)/script_test/run_tests.sh
+	echo 'python $(DIR)/$(TEST_DIR)/script_test/basic_test.py $$1 $$2 $$3' \
+		>> $(TEST_DIR)/script_test/run_tests.sh
+	chmod +x $(TEST_DIR)/script_test/run_tests.sh
 else
-	echo '#!/bin/bash' > ltest/script_test/run_tests.sh
-	echo 'export PATH=$(PATH):$(TARGET)/bin' >> ltest/script_test/run_tests.sh
-	echo 'export KB_RUNTIME=$(DEPLOY_RUNTIME)' >> ltest/script_test/run_tests.sh
-	echo 'export PYTHONPATH="$(TARGET)/lib"' >> ltest/script_test/run_tests.sh
-	echo 'export KB_SERVICE_NAME="$(SERVICE_NAME)"' >> ltest/script_test/run_tests.sh
-	echo 'export KB_DEPLOYMENT_CONFIG="$(DIR)/deploy.cfg"' >> ltest/script_test/run_tests.sh # TODO: not sure about this line
-	echo 'python $(DIR)/ltest/script_test/basic_test.py $$1 $$2 $$3' \
-		>> ltest/script_test/run_tests.sh
-	chmod +x ltest/script_test/run_tests.sh
+	echo '#!/bin/bash' > $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export PATH=$(PATH):$(TARGET)/bin' >> $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export KB_RUNTIME=$(DEPLOY_RUNTIME)' >> $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export PYTHONPATH="$(TARGET)/lib"' >> $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export KB_SERVICE_NAME="$(SERVICE_NAME)"' >> $(TEST_DIR)/script_test/run_tests.sh
+	echo 'export KB_DEPLOYMENT_CONFIG="$(DIR)/deploy.cfg"' >> $(TEST_DIR)/script_test/run_tests.sh # TODO: not sure about this line
+	echo 'python $(DIR)/$(TEST_DIR)/script_test/basic_test.py $$1 $$2 $$3' \
+		>> $(TEST_DIR)/script_test/run_tests.sh
+	chmod +x $(TEST_DIR)/script_test/run_tests.sh
 
 endif
 
 
 
-build-libs:
+compile:
 	mkdir -p scripts; kb-sdk compile $(SERVICE_SPEC)\
 		--out lib\
 		--pyclname biokbase.$(SERVICE_NAME).$(SERVICE_NAME)Client \
