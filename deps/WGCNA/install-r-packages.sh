@@ -18,12 +18,12 @@ if [ "$c" == 0 ]; then
     gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
     gpg -a --export E084DAB9 | sudo apt-key add -
     sudo apt-get update
-    #sudo apt-get -y --force-yes remove r-base-core r-base-dev
+    sudo apt-get -y --force-yes remove r-base-core r-base-dev
     # ensure the installed packages gone for clean install
     # by default, R would not update the installed packages with the latest version,
     # which causes version compatibility issues.
-    sudo rm -rf /usr/lib/R
-    sudo rm -rf /usr/local/lib/R
+    #sudo rm -rf /usr/lib/R
+    #sudo rm -rf /usr/local/lib/R
     sudo apt-get -y --force-yes install r-base
 fi
 
