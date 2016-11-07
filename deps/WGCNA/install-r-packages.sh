@@ -24,7 +24,8 @@ if [ "$c" == 0 ]; then
     # which causes version compatibility issues.
     #sudo rm -rf /usr/lib/R
     #sudo rm -rf /usr/local/lib/R
-    sudo apt-get -y --force-yes install r-base
+    #sudo apt-get -y --force-yes install r-base
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install r-base
 fi
 
 mkdir -p $dest/lib/R/library # for sanity and it actually does not use the created folder
