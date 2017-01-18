@@ -24,7 +24,8 @@ if [ "$c" == 0 ]; then
     # which causes version compatibility issues.
     sudo rm -rf /usr/lib/R
     sudo rm -rf /usr/local/lib/R
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install r-base=3.2.5-1trusty0 r-recommended=3.2.5-1trusty0 r-base-core=3.2.5-1trusty0   r-base-dev=3.2.5-1trusty0  r-base-html=3.2.5-1trusty0
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install r-base
+    #sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install r-base=3.2.5-1trusty0 r-recommended=3.2.5-1trusty0 r-base-core=3.2.5-1trusty0   r-base-dev=3.2.5-1trusty0  r-base-html=3.2.5-1trusty0 r-cran-cluster=2.0.1-1trusty0  r-cran-foreign=0.8.61-1trusty0 r-cran-kernsmooth=2.23-12-1trusty0 r-cran-lattice=0.20-29-1trusty0 r-cran-mgcv=1.7-29-1trusty0 r-cran-nlme=3.1.117-1trusty0 r-cran-rpart=4.1-8-1trusty0 r-cran-survival=2.38-1-1trusty0 r-cran-matrix=1.1-3-1trusty0
 fi
 
 mkdir -p $dest/lib/R/library # for sanity and it actually does not use the created folder
