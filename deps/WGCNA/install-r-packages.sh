@@ -24,7 +24,7 @@ if [ "$c" == 0 ]; then
     # which causes version compatibility issues.
     sudo rm -rf /usr/lib/R
     sudo rm -rf /usr/local/lib/R
-    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install r-base=3.2.5-1trusty0 r-recommended=3.2.5-1trusty0 r-base-core==3.2.5-1trusty0   r-base-dev=3.2.5-1trusty0  r-base-html=3.2.5-1trusty0
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install r-base=3.2.5-1trusty0 r-recommended=3.2.5-1trusty0 r-base-core=3.2.5-1trusty0   r-base-dev=3.2.5-1trusty0  r-base-html=3.2.5-1trusty0
 fi
 
 mkdir -p $dest/lib/R/library # for sanity and it actually does not use the created folder
